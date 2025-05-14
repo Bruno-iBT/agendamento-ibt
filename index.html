@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Agendamento iBT</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Impact&display=swap');
     body {
@@ -41,7 +42,7 @@
         <option>Sala Multiuso - 10º Andar</option>
         <option>Sala Multiuso - 11º Andar</option>
       </select>
-      <input class="p-2 border rounded" type="date" name="data" required />
+      <input id="datas" class="p-2 border rounded" type="text" placeholder="Selecione as datas" required />
       <input class="p-2 border rounded" type="time" name="horario" required />
       <input class="p-2 border rounded" type="text" placeholder="Responsável" name="responsavel" required />
       <textarea class="p-2 border rounded" placeholder="Observações" name="observacoes"></textarea>
@@ -52,19 +53,39 @@
     <div id="lista" class="space-y-2"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
+    flatpickr("#datas", {
+      mode: "multiple",
+      dateFormat: "Y-m-d",
+      locale: "pt"
+    });
+
     const form = document.getElementById('form');
     const lista = document.getElementById('lista');
+    const datasInput = document.getElementById('datas');
     const agendamentos = [];
 
     form.addEventListener('submit', e => {
       e.preventDefault();
+      const datasSelecionadas = datasInput.value.split(',').map(d => d.trim());
       const data = new FormData(form);
       const obj = Object.fromEntries(data.entries());
-      obj.status = 'Pendente';
-      agendamentos.push(obj);
+
+      datasSelecionadas.forEach(dataUnica => {
+        agendamentos.push({
+          espaco: obj.espaco,
+          data: dataUnica,
+          horario: obj.horario,
+          responsavel: obj.responsavel,
+          observacoes: obj.observacoes,
+          status: 'Pendente'
+        });
+      });
+
       render();
       form.reset();
+      datasInput._flatpickr.clear();
     });
 
     function render() {
